@@ -1,0 +1,16 @@
+-- 01_rol.sql
+-- Catálogo de roles
+
+CREATE TABLE ROL (
+  rol_id NUMBER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  nombre VARCHAR2(30) NOT NULL UNIQUE
+);
+
+COMMENT ON TABLE ROL IS 'Catálogo de roles de usuario.';
+COMMENT ON COLUMN ROL.nombre IS 'Valores: BIBLIOTECARIO, LECTOR.';
+
+-- Semilla
+INSERT INTO ROL (nombre) VALUES ('BIBLIOTECARIO');
+INSERT INTO ROL (nombre) VALUES ('LECTOR');
+
+COMMIT;
