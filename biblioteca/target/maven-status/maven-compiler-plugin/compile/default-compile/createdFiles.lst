@@ -1,6 +1,9 @@
+org\lemus\biblioteca\repository\PrestamoRepository.class
 org\lemus\biblioteca\repository\UsuarioRepository$RowMapperImpl.class
 org\lemus\biblioteca\controller\VistaUsuarioController.class
+org\lemus\biblioteca\repository\AutorRepository.class
 org\lemus\biblioteca\controller\VistaLibros.class
+org\lemus\biblioteca\controller\LibroController.class
 org\lemus\biblioteca\model\Autor.class
 org\lemus\biblioteca\model\Titulo.class
 org\lemus\biblioteca\controller\TituloController.class
@@ -15,10 +18,12 @@ org\lemus\biblioteca\controller\WhoAmIController.class
 org\lemus\biblioteca\security\DbUserDetailsService.class
 org\lemus\biblioteca\config\SecurityConfig.class
 org\lemus\biblioteca\BibliotecaApplication.class
+org\lemus\biblioteca\repository\LibroRepository.class
+org\lemus\biblioteca\controller\AutorController.class
 org\lemus\biblioteca\model\Prestamo.class
 org\lemus\biblioteca\controller\PingController.class
-org\lemus\biblioteca\repository\TituloRepository$RowMapperImpl.class
 org\lemus\biblioteca\security\DbUserDetailsService$UserRow.class
 org\lemus\biblioteca\model\Libro.class
+org\lemus\biblioteca\controller\PrestamoController.class
 org\lemus\biblioteca\model\Usuario.class
 org\lemus\biblioteca\repository\UsuarioRepository.class

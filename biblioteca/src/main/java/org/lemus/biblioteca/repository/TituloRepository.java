@@ -4,63 +4,42 @@
  */
 package org.lemus.biblioteca.repository;
 
-/**
- *
- * @author emanu
- */
 
-import org.springframework.jdbc.core.*;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
-
-
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.List;
 import org.lemus.biblioteca.model.Titulo;
 
 @Repository
 public class TituloRepository {
-  private final JdbcTemplate jdbc;
-  public TituloRepository(JdbcTemplate jdbc) { this.jdbc = jdbc; }
 
-  private static class RowMapperImpl implements RowMapper<Titulo> {
-    @Override public Titulo mapRow(ResultSet rs, int rowNum) throws SQLException {
-      Titulo t = new Titulo();
-      t.setTituloId(rs.getLong("titulo_id"));
-      t.setNombre(rs.getString("nombre"));
-      t.setIsbn(rs.getString("isbn"));
-      t.setAnio((Integer) rs.getObject("anio"));
-      t.setEditorial(rs.getString("editorial"));
-      t.setCategoria(rs.getString("categoria"));
-      return t;
+    private final JdbcTemplate jdbc;
+
+    public TituloRepository(JdbcTemplate jdbc) {
+        this.jdbc = jdbc;
     }
-  }
 
-  public List<Titulo> findAll() {
-    return jdbc.query("SELECT * FROM TITULO ORDER BY titulo_id", new RowMapperImpl());
-  }
+    public List<Titulo> findAll() {
+        return jdbc.query("SELECT * FROM TITULO", new BeanPropertyRowMapper<>(Titulo.class));
+    }
 
-  public Titulo findById(Long id) {
-    return jdbc.queryForObject("SELECT * FROM TITULO WHERE titulo_id=?", new RowMapperImpl(), id);
-  }
+    public Titulo findById(Long id) {
+        return jdbc.queryForObject("SELECT * FROM TITULO WHERE TITULO_ID = ?", new BeanPropertyRowMapper<>(Titulo.class), id);
+    }
 
-  public int create(Titulo t) {
-    String sql = """
-      INSERT INTO TITULO(nombre, isbn, anio, editorial, categoria)
-      VALUES(?, ?, ?, ?, ?)
-    """;
-    return jdbc.update(sql, t.getNombre(), t.getIsbn(), t.getAnio(), t.getEditorial(), t.getCategoria());
-  }
+    public void create(Titulo t) {
+        String sql = "INSERT INTO TITULO (NOMBRE, , ISBN, ANIO, EDITORIAL, CATEGORIA) VALUES (?, ?, ?, ?, ?, ?)";
+        jdbc.update(sql, t.getNombre(), t.getIsbn(), t.getAnio(), t.getEditorial(), t.getCategoria());
+    }
 
-  public int update(Long id, Titulo t) {
-    String sql = """
-      UPDATE TITULO SET nombre=?, isbn=?, anio=?, editorial=?, categoria=?
-      WHERE titulo_id=?
-    """;
-    return jdbc.update(sql, t.getNombre(), t.getIsbn(), t.getAnio(), t.getEditorial(), t.getCategoria(), id);
-  }
+    public void update(Long id, Titulo t) {
+        String sql = "UPDATE TITULO SET NOMBRE=?, AUTOR_ID=?, ISBN=?, ANIO=?, EDITORIAL=?, CATEGORIA=? WHERE TITULO_ID=?";
+        jdbc.update(sql, t.getNombre(), t.getAutorId(), t.getIsbn(), t.getAnio(), t.getEditorial(), t.getCategoria(), id);
+    }
 
-  public int delete(Long id) {
-    return jdbc.update("DELETE FROM TITULO WHERE titulo_id=?", id);
-  }
+    public void delete(Long id) {
+        jdbc.update("DELETE FROM TITULO WHERE TITULO_ID = ?", id);
+    }
 }
+

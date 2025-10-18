@@ -20,6 +20,7 @@ import org.lemus.biblioteca.repository.UsuarioRepository;
 
 @RestController
 @RequestMapping("/api/usuarios")
+@CrossOrigin
 public class UsuarioController {
 
   private final UsuarioRepository repo;

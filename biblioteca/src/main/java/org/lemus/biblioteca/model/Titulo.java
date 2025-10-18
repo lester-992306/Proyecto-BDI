@@ -20,6 +20,7 @@ public class Titulo {
   private Integer anio;
   private String editorial;
   private String categoria;
+  private String autorId;
   
    /**
      * @return the tituloId
@@ -103,5 +104,19 @@ public class Titulo {
      */
     public void setCategoria(String categoria) {
         this.categoria = categoria;
+    }
+
+    /**
+     * @return the autorId
+     */
+    public String getAutorId() {
+        return autorId;
+    }
+
+    /**
+     * @param autorId the autorId to set
+     */
+    public void setAutorId(String autorId) {
+        this.autorId = autorId;
     }
 }

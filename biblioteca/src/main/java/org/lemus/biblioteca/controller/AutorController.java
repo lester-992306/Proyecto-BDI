@@ -5,43 +5,45 @@
 package org.lemus.biblioteca.controller;
 
 
+
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.net.URI;
 import java.util.List;
-import org.lemus.biblioteca.model.Titulo;
-import org.lemus.biblioteca.repository.TituloRepository;
+import org.lemus.biblioteca.model.Autor;
+import org.lemus.biblioteca.repository.AutorRepository;
 
 @RestController
-@RequestMapping("/api/titulos")
+@RequestMapping("/api/autores")
 @CrossOrigin
-public class TituloController {
+public class AutorController {
 
-    private final TituloRepository repo;
+    private final AutorRepository repo;
 
-    public TituloController(TituloRepository repo) {
+    public AutorController(AutorRepository repo) {
         this.repo = repo;
     }
 
     @GetMapping
-    public List<Titulo> all() {
+    public List<Autor> all() {
         return repo.findAll();
     }
 
     @GetMapping("/{id}")
-    public Titulo one(@PathVariable Long id) {
+    public Autor one(@PathVariable Long id) {
         return repo.findById(id);
     }
 
     @PostMapping
-    public ResponseEntity<?> create(@RequestBody Titulo t) {
-        repo.create(t);
-        return ResponseEntity.created(URI.create("/api/titulos")).build();
+    public ResponseEntity<?> create(@RequestBody Autor a) {
+        repo.create(a);
+        return ResponseEntity.created(URI.create("/api/autores")).build();
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> update(@PathVariable Long id, @RequestBody Titulo t) {
-        repo.update(id, t);
+    public ResponseEntity<?> update(@PathVariable Long id, @RequestBody Autor a) {
+        repo.update(id, a);
         return ResponseEntity.noContent().build();
     }
 
