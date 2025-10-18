@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Gestión de Autores</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body { background-color: #f8f9fa; }
+    .container { margin-top: 40px; }
+    .card { border-radius: 1rem; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+  </style>
+</head>
+
+<body>
+  <nav class="navbar navbar-dark bg-dark mb-4">
+    <div class="container-fluid">
+      <a class="navbar-brand fw-bold">📚 Biblioteca - Autores</a>
+      <a href="/dashboard" class="btn btn-outline-light btn-sm">Volver al Dashboard</a>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="card p-4">
+      <h3 class="text-center mb-4">Gestión de Autores</h3>
+
+      <!-- Formulario -->
+      <form id="autorForm" class="row g-3">
+        <input type="hidden" id="autorId">
+        <div class="col-md-6">
+          <label class="form-label">Nombres</label>
+          <input type="text" id="nombres" class="form-control" required>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Apellidos</label>
+          <input type="text" id="apellidos" class="form-control" required>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Fecha de nacimiento</label>
+          <input type="date" id="fechaNacimiento" class="form-control" required>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Nacionalidad</label>
+          <input type="text" id="nacionalidad" class="form-control" required>
+        </div>
+        <div class="col-12 text-end">
+          <button type="submit" class="btn btn-primary">Guardar</button>
+          <button type="button" id="cancelar" class="btn btn-secondary">Cancelar</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Tabla -->
+    <div class="card p-4 mt-4">
+      <h5 class="mb-3">Lista de autores</h5>
+      <table class="table table-striped align-middle text-center">
+        <thead class="table-dark">
+          <tr>
+            <th>ID</th>
+            <th>Nombres</th>
+            <th>Apellidos</th>
+            <th>Fecha Nacimiento</th>
+            <th>Nacionalidad</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="tablaAutores"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    const API_URL = '/api/autores';
+    const tabla = document.getElementById('tablaAutores');
+    const form = document.getElementById('autorForm');
+    const cancelarBtn = document.getElementById('cancelar');
+    let editando = false;
+
+    // Cargar todos los autores
+    async function cargarAutores() {
+      const res = await fetch(API_URL);
+      const data = await res.json();
+      tabla.innerHTML = '';
+      data.forEach(a => {
+        tabla.innerHTML += `
+          <tr>
+            <td>${a.autorId}</td>
+            <td>${a.nombres}</td>
+            <td>${a.apellidos}</td>
+            <td>${a.fechaNacimiento}</td>
+            <td>${a.nacionalidad}</td>
+            <td>
+              <button class="btn btn-warning btn-sm" onclick="editarAutor(${a.autorId})">Editar</button>
+              <button class="btn btn-danger btn-sm" onclick="eliminarAutor(${a.autorId})">Eliminar</button>
+            </td>
+          </tr>`;
+      });
+    }
+
+    // Crear o actualizar autor
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const autor = {
+        nombres: form.nombres.value,
+        apellidos: form.apellidos.value,
+        fechaNacimiento: form.fechaNacimiento.value,
+        nacionalidad: form.nacionalidad.value
+      };
+      if (!editando) {
+        await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(autor)
+        });
+      } else {
+        const id = form.autorId.value;
+        await fetch(`${API_URL}/${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(autor)
+        });
+        editando = false;
+      }
+      form.reset();
+      cargarAutores();
+    });
+
+    // Editar autor
+    async function editarAutor(id) {
+      const res = await fetch(`${API_URL}/${id}`);
+      const a = await res.json();
+      form.autorId.value = a.autorId;
+      form.nombres.value = a.nombres;
+      form.apellidos.value = a.apellidos;
+      form.fechaNacimiento.value = a.fechaNacimiento;
+      form.nacionalidad.value = a.nacionalidad;
+      editando = true;
+    }
+
+    // Eliminar autor
+    async function eliminarAutor(id) {
+      if (confirm('¿Seguro que desea eliminar este autor?')) {
+        await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
+        cargarAutores();
+      }
+    }
+
+    cancelarBtn.addEventListener('click', () => {
+      editando = false;
+      form.reset();
+    });
+
+    cargarAutores();
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

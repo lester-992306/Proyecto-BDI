@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Gestión de Títulos</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body { background-color: #f8f9fa; }
+    .container { margin-top: 40px; }
+    .card { border-radius: 1rem; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+  </style>
+</head>
+
+<body>
+  <nav class="navbar navbar-dark bg-dark mb-4">
+    <div class="container-fluid">
+      <a class="navbar-brand fw-bold">📚 Biblioteca - Títulos</a>
+      <a href="/dashboard" class="btn btn-outline-light btn-sm">Volver al Dashboard</a>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="card p-4">
+      <h3 class="text-center mb-4">Gestión de Títulos</h3>
+
+      <!-- Formulario -->
+      <form id="tituloForm" class="row g-3">
+        <input type="hidden" id="tituloId">
+        <div class="col-md-6">
+          <label class="form-label">Nombre del título</label>
+          <input type="text" id="nombre" class="form-control" required>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Autor</label>
+          <select id="autorId" class="form-select" required></select>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">ISBN</label>
+          <input type="text" id="isbn" class="form-control" required>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Año</label>
+          <input type="number" id="anio" class="form-control" min="1000" max="9999" required>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Editorial</label>
+          <input type="text" id="editorial" class="form-control" required>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Categoría</label>
+          <input type="text" id="categoria" class="form-control" required>
+        </div>
+        <div class="col-12 text-end">
+          <button type="submit" class="btn btn-primary">Guardar</button>
+          <button type="button" id="cancelar" class="btn btn-secondary">Cancelar</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Tabla -->
+    <div class="card p-4 mt-4">
+      <h5 class="mb-3">Lista de títulos</h5>
+      <table class="table table-striped align-middle text-center">
+        <thead class="table-dark">
+          <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Autor</th>
+            <th>ISBN</th>
+            <th>Año</th>
+            <th>Editorial</th>
+            <th>Categoría</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="tablaTitulos"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    const API_TITULOS = '/api/titulos';
+    const API_AUTORES = '/api/autores';
+    const tabla = document.getElementById('tablaTitulos');
+    const form = document.getElementById('tituloForm');
+    const cancelarBtn = document.getElementById('cancelar');
+    const selectAutor = document.getElementById('autorId');
+    let editando = false;
+
+    // Cargar lista de autores para el select
+    async function cargarAutores() {
+      const res = await fetch(API_AUTORES);
+      const autores = await res.json();
+      selectAutor.innerHTML = '<option value="">Seleccione un autor...</option>';
+      autores.forEach(a => {
+        selectAutor.innerHTML += `<option value="${a.autorId}">${a.nombres} ${a.apellidos}</option>`;
+      });
+    }
+
+    // Cargar títulos
+    async function cargarTitulos() {
+      const res = await fetch(API_TITULOS);
+      const data = await res.json();
+      tabla.innerHTML = '';
+      for (const t of data) {
+        // Obtener nombre de autor
+        let autorNombre = '—';
+        try {
+          const autor = await fetch(`${API_AUTORES}/${t.autorId}`).then(r => r.json());
+          autorNombre = autor.nombres + ' ' + autor.apellidos;
+        } catch (e) {}
+        tabla.innerHTML += `
+          <tr>
+            <td>${t.tituloId}</td>
+            <td>${t.nombre}</td>
+            <td>${autorNombre}</td>
+            <td>${t.isbn}</td>
+            <td>${t.anio}</td>
+            <td>${t.editorial}</td>
+            <td>${t.categoria}</td>
+            <td>
+              <button class="btn btn-warning btn-sm" onclick="editarTitulo(${t.tituloId})">Editar</button>
+              <button class="btn btn-danger btn-sm" onclick="eliminarTitulo(${t.tituloId})">Eliminar</button>
+            </td>
+          </tr>`;
+      }
+    }
+
+    // Crear o actualizar título
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const titulo = {
+        nombre: form.nombre.value,
+        autorId: form.autorId.value,
+        isbn: form.isbn.value,
+        anio: parseInt(form.anio.value),
+        editorial: form.editorial.value,
+        categoria: form.categoria.value
+      };
+      if (!editando) {
+        await fetch(API_TITULOS, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(titulo)
+        });
+      } else {
+        const id = form.tituloId.value;
+        await fetch(`${API_TITULOS}/${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(titulo)
+        });
+        editando = false;
+      }
+      form.reset();
+      cargarTitulos();
+    });
+
+    // Editar título
+    async function editarTitulo(id) {
+      const res = await fetch(`${API_TITULOS}/${id}`);
+      const t = await res.json();
+      form.tituloId.value = t.tituloId;
+      form.nombre.value = t.nombre;
+      form.autorId.value = t.autorId;
+      form.isbn.value = t.isbn;
+      form.anio.value = t.anio;
+      form.editorial.value = t.editorial;
+      form.categoria.value = t.categoria;
+      editando = true;
+    }
+
+    // Eliminar título
+    async function eliminarTitulo(id) {
+      if (confirm('¿Seguro que desea eliminar este título?')) {
+        await fetch(`${API_TITULOS}/${id}`, { method: 'DELETE' });
+        cargarTitulos();
+      }
+    }
+
+    cancelarBtn.addEventListener('click', () => {
+      editando = false;
+      form.reset();
+    });
+
+    // Inicializar
+    cargarAutores();
+    cargarTitulos();
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
